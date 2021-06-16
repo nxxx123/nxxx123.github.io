@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+	
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>OneDrive直链解析</title>
+		<link rel="stylesheet" href="https://lib.baomitu.com/mdui/1.0.1/css/mdui.min.css" crossorigin="anonymous" />
+		<script src="https://lib.baomitu.com/mdui/1.0.1/js/mdui.min.js" crossorigin="anonymous"></script>
+	</head>
+	
+	<body class="mdui-theme-accent-pink">
+		<div class="mdui-container">
+			<div class="mdui-row mdui-center">
+				<div class="mdui-typo">
+					 <h2 style="text-align:center">OneDrive直链解析</h2>
+				</div>
+				<div class="mdui-textfield mdui-center">
+					<i class="mdui-icon material-icons">&#xe157;</i>
+					<textarea class="mdui-textfield-input" id="link" rows="4" placeholder="带http(s)://"></textarea>
+					<div class="mdui-textfield-helper">请输入分享链接</div>
+				</div>
+				<div class="mdui-col" style="padding:16px 12px;">
+					<button id="action" class="mdui-ripple mdui-btn mdui-btn-block mdui-color-theme-accent mdui-ripple">解析</button>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" charset="utf-8">
+		var $ = mdui.$;
+		$('#action').on('click', function () {
+			let $link = $('#link').val();
+			let $content, $share, $userDomain, $domain, $url;
+			// 判断网址是否正确的正则
+			let $patternLink = /http(s)?:\/\/([\w-]+)*\.sharepoint.c(n)|(om)/g;
+			// 提前链接数据的正则
+			let $patternShare = /(?<=\/personal\/\w+\/)[^\?]+(?=(\?)*)/g;
+			// 提取用户域名的正则
+			let $patternUserDomain = /(?<=personal).*(?=\/)/g;
+			// 匹配域名
+			let $patternDomain = /(?<=http(s)?:\/\/)[a-zA-Z0-9-.]+/g;
+			// 判断链接是否正确
+			if(!$patternLink.test($link)){
+				return mdui.dialog({title: '解析错误',content:'未知错误',buttons:[{text:'关闭'}]});
+			};
+			if(
+				$patternShare.test($link) &&
+				$patternUserDomain.test($link) &&
+				$patternDomain.test($link)
+			){
+				$share      = $link.match(new RegExp($patternShare))[0];
+				$userDomain = $link.match(new RegExp($patternUserDomain))[0];
+				$domain     = $link.match(new RegExp($patternDomain))[0];
+			} else {
+				return mdui.dialog({title: '解析错误',content:'未知错误',buttons:[{text:'关闭'}]});
+			}
+			// 拼接url
+			$url = 'https://' + $domain + '/personal/' + $userDomain + '/_layouts/51/download.aspx?share=' + $share
+			$content = '直链地址，请手动复制保存<div class="mdui-typo"><kbd>'+ $url +'</kbd> </div>';
+			mdui.dialog({
+				title: '解析成功',
+				content: $content,
+				buttons: [
+					{
+						text: '关闭'
+					}
+				]
+			});
+		});
+		</script>
+	</body>
+
+</html>
